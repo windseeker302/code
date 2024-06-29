@@ -1,1 +1,2 @@
-# code
+python study code ~~~!
+
