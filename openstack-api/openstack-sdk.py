@@ -1,26 +1,57 @@
-# 1.执行 sdk_server_manager.py 脚本,成功创建云主机，计 0.5 分
-# 2.检查创建的云主机状态正确，计 0.5 分
-
-import json
+import argparse,json
 from openstack import connection
 
 conn = connection.Connection(
-    auth_url='http://172.129.78.94:5000/v3/',
-    project_name="admin",
-    domain_name="demo",
-    username='admin',
-    password='000000')
+            auth_url = 'http://172.129.78.57:5000/v3/',
+            project_name = 'admin',
+            domain_name = 'demo',
+            username = 'admin',
+            password = '000000'
+        )
+def createFlavor():
+    print(json.dumps(conn.create_flavor(args.n,args.m,args.v,args.d,flavorid=args.id)))
 
-if __name__ == '__main__':
-    # 创建 flavor
-    conn.create_flavor(name="ws1",ram=1024,vcpus=2,disk=10)
-    # 创建镜像
-    conn.create_image(name="cirros",filename='./cirros-0.6.2-aarch64-disk.img',container_format='bare',disk_format='qcow2')
-    # 创建网络
-    conn.create_network(external=True,name='ext1')
-    conn.create_subnet('ext1',subnet_name='ext1-subnet',cidr='192.168.150.0/24')
-    # 创建实例
-    conn.create_server(name='ws',image='cirros',flavor='ws1',network='ext1')
-    # 遍历查看实例
-    for i in conn.list_servers():
-        print(i)
+def getFlavor():
+    # conn.get_flavor_by_id(args.id)
+    print(json.dumps(conn.get_flavor_by_id(id=args.id)))
+
+def getallflavor():
+    for i in conn.list_flavors():
+        print(json.dumps(i))
+
+def deleteFlavor():
+    conn.delete_flavor(args.id)
+
+
+# 解析命令行参数和选项
+parser = argparse.ArgumentParser(description='我是程序帮助，会显示在 -h 或 --help 中')
+
+subpareser = parser.add_subparsers(help='子命令帮助信息',required=True)
+
+# 位置参数 create
+create_flavor = subpareser.add_parser('create',help='创建实例规格')
+create_flavor.add_argument('-n',help='指定 flavor 名称',type=str,required=True)
+create_flavor.add_argument('-m',help='指定内存大小，单位M',type=int,required=True)
+create_flavor.add_argument('-v',help='指定虚拟cpu个数',type=int,required=True)
+create_flavor.add_argument('-d',help='指定磁盘大小，单位G',type=int,required=True)
+create_flavor.add_argument('-id',help='指定ID',type=str)
+create_flavor.set_defaults(func=createFlavor)
+
+# 位置参数 getall
+getall_flavor = subpareser.add_parser('getall',help='获取实例规格')
+getall_flavor.set_defaults(func=getallflavor)
+
+# 位置参数 get
+get_flavor = subpareser.add_parser('get',help='获取实例规格')
+get_flavor.add_argument('-id',type=str,help='指定ID查询')
+get_flavor.set_defaults(func=getFlavor)
+
+# # 位置参数 delete
+delete_flavor = subpareser.add_parser('delete',help='删除实例规格')
+delete_flavor.add_argument('-id',type=str,help='指定ID删除')
+delete_flavor.set_defaults(func=deleteFlavor)
+
+
+args = parser.parse_args()
+# 根据不同的子命令执行不同的函数，传入args参数
+args.func()
