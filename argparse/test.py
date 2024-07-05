@@ -22,7 +22,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description="Openstack flavor管理")
-# parser.add_argument('-n','--name',help='名称')
+parser.add_argument('-n','--name',help='名称')
 # 子命令
 subparsers = parser.add_subparsers(help='子命令帮助信息')
 # create：创建实例规格

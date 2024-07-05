@@ -100,8 +100,3 @@ def create(server_name, imagename = "CentOS 7.9 64bit"):
     # 获取 serverid
     # return image_get(ServerName=ServerName)
     
-
-# create(server_name="test3")
-if __name__ == "__main__":
-    # print(create('zhh'))
-    print(delete("zhh"))
