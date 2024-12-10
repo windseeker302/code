@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Upload Form</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .form-container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        width: 300px;
+    }
+    .input-group {
+        margin-bottom: 10px;
+    }
+    .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #666;
+    }
+    .input-group input[type="file"] {
+        display: block;
+        width: 100%;
+    }
+    .submit-btn {
+        background-color: #f44336;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        width: 100%;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: background-color 0.3s ease;
+    }
+    .submit-btn:hover {
+        background-color: #e53935;
+    }
+</style>
+</head>
+<body>
+<div class="form-container">
+    <div class="input-group">
+        <label for="imageUpload">上传图片：</label>
+        <input type="file" id="imageUpload" accept="image/*">
+    </div>
+    <button class="submit-btn" type="submit">提交</button>
+    <p id="fileName"></p>
+    <!-- 添加一个用于显示响应结果的元素 -->
+    <p id="responseText"></p>
+</div>
+
+<script>
+    const imageUpload = document.getElementById('imageUpload');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.querySelector('.submit-btn');
+    const responseText = document.getElementById('responseText');
+
+    imageUpload.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            fileName.textContent = '已选择文件: ' + this.files[0].name;
+        } else {
+            fileName.textContent = '';
+        }
+    });
+
+    submitBtn.addEventListener('click', function(event) {
+        event.preventDefault(); // 防止表单默认提交
+
+        const file = imageUpload.files[0];
+        if (!file) {
+            alert('请先选择一个文件！');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch('/analyzer', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            responseText.textContent = '分析结果：' + data;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            responseText.textContent = '发生错误，请重试。';
+        });
+    });
+</script>
+</body>
+</html>

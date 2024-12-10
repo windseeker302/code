@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>展示结果</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .hidden {
+            display: none;
+        }
+        .loading {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>返回结果展示</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" required>
+            <button type="submit" id="uploadButton">上传图片</button>
+        </form>
+        <div id="loading" class="loading hidden">加载中...</div>
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const fileInput = document.getElementById('fileInput');
+            formData.append('file', fileInput.files[0]);
+
+            const uploadButton = document.getElementById('uploadButton');
+            const loadingDiv = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+
+            // Disable the button and show loading animation
+            uploadButton.disabled = true;
+            loadingDiv.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            fetch('/analyzer', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 0) {
+                    resultDiv.innerHTML = `<p>消息: ${data.msg}</p><p>分类名称: ${data.data.class_name}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p>错误: ${data.msg}</p>`;
+                }
+                resultDiv.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p>请求失败，请重试。</p>`;
+                resultDiv.classList.remove('hidden');
+            })
+            .finally(() => {
+                // Enable the button and hide loading animation
+                uploadButton.disabled = false;
+                loadingDiv.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

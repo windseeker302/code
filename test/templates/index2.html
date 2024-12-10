@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>展示结果</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #e0f7fa;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #00796b;
+            color: #ffffff;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        label:hover {
+            background-color: #004d40;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #00796b;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f1f8e9;
+            color: #33691e;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .result.visible {
+            opacity: 1;
+        }
+        .hidden {
+            display: none;
+        }
+        .loading {
+            margin-top: 20px;
+            color: #00796b;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .loading.visible {
+            opacity: 1;
+        }
+        .file-name {
+            margin-top: 10px;
+            color: #00796b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>水果识别1.0</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="fileInput">选择图片</label>
+            <input type="file" name="file" id="fileInput" required>
+            <button type="submit" id="uploadButton">上传图片</button>
+            <div id="fileName" class="file-name hidden"></div>
+        </form>
+        <div id="loading" class="loading hidden">上传中...</div>
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const fileNameDiv = document.getElementById('fileName');
+            const fileName = event.target.files[0] ? event.target.files[0].name : '';
+            fileNameDiv.textContent = fileName;
+            fileNameDiv.classList.toggle('hidden', !fileName);
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            const fileInput = document.getElementById('fileInput');
+            formData.append('file', fileInput.files[0]);
+
+            const uploadButton = document.getElementById('uploadButton');
+            const loadingDiv = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+
+            // Disable the button and show loading animation
+            uploadButton.disabled = true;
+            loadingDiv.classList.remove('hidden');
+            loadingDiv.classList.add('visible');
+            resultDiv.classList.add('hidden');
+            resultDiv.classList.remove('visible');
+
+            fetch('/analyzer', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 0) {
+                    let resultHtml = `<p>结果: ${data.data.class_name}</p><p>概率: ${data.data.confidence}</p>`;
+                    if (data.data.confidence < 0.3) {
+                        resultHtml += `<p style="color: red;">该图片品类可能不在训练集中，识别结果可能不准确</p>`;
+                    }
+                    resultDiv.innerHTML = resultHtml;
+                } else {
+                    resultDiv.innerHTML = `<p>错误: ${data.msg}</p>`;
+                }
+                resultDiv.classList.remove('hidden');
+                resultDiv.classList.add('visible');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p>请求失败，请重试。</p>`;
+                resultDiv.classList.remove('hidden');
+                resultDiv.classList.add('visible');
+            })
+            .finally(() => {
+                // Enable the button and hide loading animation
+                uploadButton.disabled = false;
+                loadingDiv.classList.add('hidden');
+                loadingDiv.classList.remove('visible');
+            });
+        });
+    </script>
+</body>
+</html>
