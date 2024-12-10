@@ -1,5 +1,7 @@
 # Fruit Recognition with TensorFlow
 
+[中文版 README](README_CN.md)
+
 ## Project Overview
 
 This project leverages TensorFlow to build a neural network model capable of recognizing 26 types of fruits. By training the model on labeled image data, we provide an efficient solution for fruit classification, offering potential applications in agriculture, retail, and other industries.
