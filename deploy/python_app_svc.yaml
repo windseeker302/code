@@ -2,14 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: ai-v7
-  name: ai-v7
-  namespace: ai-v7
+    app: python-app
+  name: python-app
+  namespace: python-app
 spec:
   ports:
   - port: 5001
     protocol: TCP
     targetPort: 5001
+    nodePort: 30001
   selector:
-    app: ai-v7
+    app: python-app
   type: NodePort

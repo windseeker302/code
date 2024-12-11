@@ -2,23 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: ai-v7
-  name: ai-v7
-  namespace: ai-v7
+    app: python-app
+  name: python-app
+  namespace: python-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: ai-v7
+      app: python-app
   template:
     metadata:
       labels:
-        app: ai-v7
+        app: python-app
     spec:
       containers:
-      - image: ai:V7
-        name: ai-v7
-        imagePullPolicy: Never
+      - image: "123.60.182.14/python-app/python-app:v1"
+        name: python-app
         env: 
         - name: MQTT_HOST
           value: "mqtt-svc"
